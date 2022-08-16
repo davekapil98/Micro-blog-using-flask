@@ -1,0 +1,273 @@
+@import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200&display=swap');
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Assistant', sans-serif;
+    --my-color: #6C63FF;
+    --color-background: #e6ecf0;
+    display: flex;
+    height: 100vh;
+    max-width: 1300px;
+    margin-left: auto;
+    align-items: center;
+    justify-content: center;
+    margin-right: auto;
+    padding: 0 10px;
+    overflow: hidden;
+}
+
+main {
+    overflow-y: auto;
+}
+
+.wrapper {
+    display: flex;
+    height: 100%;
+}
+
+aside {
+    flex: 1 0 10%;
+}
+
+.wrapper ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+/*Left Sidebar*/
+
+.sidebarOption {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.sidebartitle {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.material-symbols-outlined {
+    padding: 20px;
+}
+
+.sidebarOption h2 {
+    font-weight: 800;
+    font-size: 20px;
+    margin-right: 20px;
+}
+
+.sidebartitle h2 {
+    font-weight: 1000;
+    font-size: 26px;
+    margin-right: 20px;
+}
+
+.sidebarOption:hover {
+    background-color: var(--color-background);
+    border-radius: 30px;
+    color: var(--my-color);
+    transition: color 100ms ease-out;
+}
+
+.active {
+    color: var(--my-color);
+}
+
+.sidebar {
+    border-right: 1px solid var(--color-background);
+    flex: 0.2;
+    min-width: 250px;
+    margin-top: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/*Main Feed*/
+
+.feed {
+    flex-direction: row;
+    flex: 0.7;
+    border-right: 1px solid var(--color-background);
+    min-width: fit-content;
+    overflow-y: scroll;
+}
+
+.feed_header {
+    position: sticky;
+    top: 0;
+    background-color: var(--my-color);
+    z-index: 100;
+    border: 1px solid var(--color-background);
+    padding: 15px 20px;
+    border-radius: 10px;
+    color: white;
+}
+
+.feed_header h2 {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+/*--Blog Post Input*/
+.bloginput img {
+    border-radius: 50%;
+    height: 5.5vmin;
+}
+
+.blogbox {
+    padding-bottom: 10px;
+    border-bottom: 8px solid var(--color-background);
+    padding-right: 10px;
+}
+
+.blogbox form {
+    display: flex;
+    flex-direction: column;
+}
+
+.bloginput {
+    display: flex;
+    padding-left: 0.5vmin;
+    padding-top: 2vmin;
+    padding-right: 2vmin;
+    padding-bottom: 2vmin;
+}
+
+.bloginput input {
+    flex: 1;
+    margin-left: 1.5vmin;
+    font-size: 3.2vmin;
+    border: none;
+    outline: none;
+}
+
+.blogbox_button {
+    background-color: var(--my-color);
+    border: none;
+    color: white;
+    border-radius: 30px;
+    width: 80px;
+    height: 40px;
+    margin-top: 20px;
+    margin-left: auto;
+}
+
+/*Posts*/
+
+.post_avatar img {
+    border-radius: 50%;
+    height: 5.5vmin;
+    margin-top: 0.6vmin;
+    margin-left: 0.5vmin;
+}
+
+.post {
+    display: flex;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--color-background);
+    padding-bottom: 10px;
+}
+
+.post_body img {
+    object-fit: contain;
+    border-radius: 20px;
+    max-width: 100vmin;
+    height: auto;
+    object-fit: cover;
+    padding: 0.5vmin;
+}
+
+.post_headerSpecial {
+    font-size: 2.5vmin;
+    font-weight: 600;
+    color: grey;
+}
+
+.post_headerText h3 {
+    font-size: 2.6vmin;
+    margin-bottom: 5px;
+}
+
+.post_content {
+    margin-bottom: 10px;
+    margin-right: 10px;
+    font-size: 2.7vmin;
+    max-width: 80vmin;
+    text-align: justify;
+    padding: 0.5vmin;
+}
+
+.post_body {
+    flex: 1;
+    padding: 10px;
+}
+
+@media (max-width: 768px) {
+    .wrapper {
+        flex-direction: column-reverse;
+        position: fixed;
+    }
+
+    ul {
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+    }
+
+    .sidebarOption {
+        color: white;
+        background-color: var(--my-color);
+        border-radius: 30px;
+        margin: 5px;
+    }
+
+    .active {
+        color: var(--my-color);
+        background-color: #e6ecf0;
+    }
+
+    .sidebartitle {
+        display: none;
+    }
+
+    .sidebarOption h2 {
+        font-weight: 600;
+        font-size: 10px;
+        margin-right: 10px;
+    }
+
+    .material-symbols-outlined {
+        
+        height: auto;
+        max-width: 50%;
+        padding: 10px;
+    }
+    .feed {
+        border-left: 1px solid var(--color-background)
+    }
+
+    .sidebar {
+        border-left: 1px solid var(--color-background)
+    }
+}
+
+.feed::-webkit-scrollbar {
+    display: none;
+}
+
+.feed {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

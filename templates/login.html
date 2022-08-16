@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../static/login.css">
+    <title>Login</title>
+</head>
+<body>
+    <div class="container">
+        <div class="screen">
+            <div class="screen__content">
+                <form class="login" method="post">
+                    {{ form.hidden_tag() }}
+                    <div class="login__field">
+                        {{ form.username.label (class="button__text") }}<br>
+                        {{ form.username(size=32, class="login__input") }} 
+                    </div>
+
+                    <div class="login__field">
+                        {{ form.password.label(class="button__text") }}<br>
+                        {{ form.password(size=32, class="login__input") }}
+                    </div>
+
+                    <br/>
+                    <p>{{ form.remember_me(class="button__text") }} {{ form.remember_me.label }}</p>
+                     <p>{{ form.submit(class="button login__submit") }}</p>
+                </form>
+
+                <div class="signup_button">
+                    <a href="/register" class="button login__submit">
+                        <span class="button__text">Sign Up</span>
+                    </a>
+                </div>
+                
+            </div>
+            <div class="screen__background">
+                <span class="screen__background__shape screen__background__shape4"></span>
+                <span class="screen__background__shape screen__background__shape3"></span>
+                <span class="screen__background__shape screen__background__shape2"></span>
+                <span class="screen__background__shape screen__background__shape1"></span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
