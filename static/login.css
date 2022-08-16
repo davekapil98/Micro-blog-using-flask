@@ -88,7 +88,7 @@ body {
 .login {
 	width: 320px;
 	padding: 30px;
-	padding-top: 130px;
+	padding-top: 120px;
 }
 
 .login__field {
@@ -148,7 +148,7 @@ body {
 .register {
 	width: 320px;
 	padding: 30px;
-	padding-top: 25px;
+	padding-top: 40px;
 }
 
 a {
