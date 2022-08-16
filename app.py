@@ -1,6 +1,3 @@
-from time import timezone
-from unicodedata import name
-import bcrypt
 from flask import Flask, url_for
 from flask import render_template, redirect
 from flask_sqlalchemy import SQLAlchemy
