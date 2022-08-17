@@ -6,8 +6,8 @@
 To create a basic version of web application which is in function like **Twitter** and allows user to create an account and post micro-blogs on the social media web-app.
 
 ### Scope of the Project:
-1. Secure **Log-In** & **Log-out** functionality.
-2. Register as a **New User**.
+1. Secure **Log-In** & **Log-out** functionality. [x]
+2. Register as a **New User**. [x]
 3. Have a **Profile Section** with personal decription, birth-date, Name, Profile picture, user_id, etc information.
 4. Basic **Posting** function.
 5. Ability to **Like & Dislike** posts.
