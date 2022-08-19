@@ -21,7 +21,7 @@
                     </div>
                 </li>
                 <li>
-                    <a href="#">
+                    <a href="{{url_for('index')}}">
                         <div class="sidebarOption active">
                             <span class="material-symbols-outlined">home_app_logo</span>
                             <h2>Home</h2>
@@ -29,7 +29,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#">
+                    <a href="{{url_for('explore')}}">
                         <div class="sidebarOption">
                             <span class="material-symbols-outlined">explore</span>
                             <h2>Explore</h2>
@@ -37,7 +37,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#">
+                    <a href="{{url_for('my_profile')}}">
                         <div class="sidebarOption">
                             <span class="material-symbols-outlined">account_circle</span>
                             <h2>Profile</h2>
@@ -65,133 +65,16 @@
     <!--Left sidebar ends-->
 
     <!--Main Feed-->
-        <main>
-            <div class="feed">
-                <div class="feed_header">
-                    <h2>Welcome!!!</h2>
-                </div>
-                <!--Blog Post Starts-->
-                <div class="blogbox">
-                    <form action="#">
-                        <div class="bloginput">
-                            <img src="../static/Images/default_profile.webp" alt=""/>
-                            <input type="text" name="" id="" placeholder="What's happening?"/>
-                        </div>
-                        <button class="blogbox_button">Post</button>
-                    </form>
-                </div>
-                <!--Post Ends-->
+    {% block PostHeader %}{% endblock %}
+                <!--Add Post Ends-->
 
                 <!--Posts-->
-                <div class="post">
-                    <div class="post_avatar">
-                        <img src="..//static/Images/default_profile.webp" alt="">
-                    </div>
-
-                    <div class="post_body">
-                        <div class="post_header">
-                            <div class="post_headerText">
-                                <h3>
-                                    Kapil Dave
-                                    <span class="post_headerSpecial">
-                                        <span></span>@davekapil98
-                                    </span>
-                                </h3>
-                            </div>
-                            <div class="post_content">
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-                                </p>
-                            </div>
-                        </div>
-
-                        <img src="../static/Images/testing image.avif" alt=""/>
-                    </div>
-                </div>
-
-                <div class="post">
-                    <div class="post_avatar">
-                        <img src="..//static/Images/default_profile.webp" alt="">
-                    </div>
-
-                    <div class="post_body">
-                        <div class="post_header">
-                            <div class="post_headerText">
-                                <h3>
-                                    Kapil Dave
-                                    <span class="post_headerSpecial">
-                                        <span></span>@davekapil98
-                                    </span>
-                                </h3>
-                            </div>
-                            <div class="post_content">
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-                                </p>
-                            </div>
-                        </div>
-
-                        <img src="../static/Images/testing image.avif" alt=""/>
-                    </div>
-                </div>
-
-                <div class="post">
-                    <div class="post_avatar">
-                        <img src="..//static/Images/default_profile.webp" alt="">
-                    </div>
-
-                    <div class="post_body">
-                        <div class="post_header">
-                            <div class="post_headerText">
-                                <h3>
-                                    Kapil Dave
-                                    <span class="post_headerSpecial">
-                                        <span></span>@davekapil98
-                                    </span>
-                                </h3>
-                            </div>
-                            <div class="post_content">
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-                <div class="post">
-                    <div class="post_avatar">
-                        <img src="..//static/Images/default_profile.webp" alt="">
-                    </div>
-
-                    <div class="post_body">
-                        <div class="post_header">
-                            <div class="post_headerText">
-                                <h3>
-                                    Kapil Dave
-                                    <span class="post_headerSpecial">
-                                        <span></span>@davekapil98
-                                    </span>
-                                </h3>
-                            </div>
-                            <div class="post_content">
-                                <p>
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-                                </p>
-                            </div>
-                        </div>
-
-                        <img src="../static/Images/testing image.avif" alt=""/>
-                    </div>
-                </div>
+                {% block main %}{% endblock %}
             <!--Post ends-->
             </div>
         </main>
     <!--Main feed posting ends-->
     </div>
-
-    {% block main %}{% endblock %}
     <script src="../static/main.js"></script>
 </body>
 </html>
