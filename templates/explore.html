@@ -39,7 +39,7 @@ Index
         <div class="post_header">
             <div class="post_headerText">
                 <h3>
-                    {{ post.author.name }}
+                    <a href="{{ url_for('user_profile', username = post.author.username) }}">{{ post.author.name }}</a>
                     <span class="post_headerSpecial">
                         <span></span>@{{ post.author.username }}
                     </span>

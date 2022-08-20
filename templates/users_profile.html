@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Profile
+{% endblock %}
+
+{% block PostHeader %} 
+    <h1>My Profile</h1>
+    <div>
+        <h3>Name</h3>
+        <p>{{ profile.user_user.name}}</p>
+    </div>
+    <div>
+        <h3>Username</h3>
+        <p>{{ profile.user_user.username}}</p>
+    </div>
+    <div>
+        <h3>Email Address</h3>
+        <p>{{ profile.email}}</p>
+    </div>
+    <div>
+        <h3>Birthdate</h3>
+        <p>{{ profile.Birthdate}}</p>
+    </div>
+    <div>
+        <h3>Profile Pic Url</h3>
+        <p>{{ profile.profile_pic_url}}</p>
+    </div>
+    <div>
+        <h3>Description</h3>
+        <p>{{ profile.description}}</p>
+    </div>
+    <div>
+        <form method="post">
+        {{ form.hidden_tag() }}
+        {% if following %}
+            {{ form.unfollow() }}
+        {% else %}    
+            {{ form.follow() }}
+        {% endif %}
+        </form>
+    </div>
+    {% endblock %}
