@@ -1,19 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New_Profile</title>
-</head>
-<body>
-    <form method="post">
-        <p>{{ form.hidden_tag() }}</p>
-        <p>{{ form.description()}}</p>
-        <p>{{ form.email()}}</p>
-        <p>{{ form.birthdate()}}</p>
-        <p>{{ form.submit()}}</p>
-    </form>
-    
-</body>
-</html>
+{% extends "layout.html" %}
+
+{% block title %}
+Profile
+{% endblock %}
+
+{% block PostHeader %} 
+    <h1>My Profile</h1>
+    <div>
+        <h3>Name</h3>
+        <p>{{ my_profile.user_user.name}}</p>
+    </div>
+    <div>
+        <h3>Username</h3>
+        <p>{{ my_profile.user_user.username}}</p>
+    </div>
+    <div>
+        <h3>Email Address</h3>
+        <p>{{ my_profile.email}}</p>
+    </div>
+    <div>
+        <h3>Birthdate</h3>
+        <p>{{ my_profile.Birthdate}}</p>
+    </div>
+    <div>
+        <h3>Profile Pic Url</h3>
+        <p>{{ my_profile.profile_pic_url}}</p>
+    </div>
+    <div>
+        <h3>Description</h3>
+        <p>{{ my_profile.description}}</p>
+    </div>
+    <div>
+    <h2>Update Profile</h1>
+        <form method="post">
+            <p>{{ form.hidden_tag() }}</p>
+            <p>{{ form.description()}}</p>
+            <p>{{ form.email()}}</p>
+            <p>{{ form.birthdate()}}</p>
+            <p>{{ form.submit()}}</p>
+        </form>
+    </div>
+    {% endblock %}

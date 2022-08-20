@@ -1,9 +1,9 @@
 from flask import Flask, url_for
-from flask import render_template, redirect
+from flask import render_template, redirect, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, EmailField, DateField, URLField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, EmailField, DateField, URLField, FileField
 from wtforms.validators import DataRequired, Length, ValidationError, EqualTo
 from flask_bcrypt import Bcrypt
 from datetime import datetime
@@ -112,9 +112,16 @@ class RegisterForm(FlaskForm):
 class LoginForm(FlaskForm):
     username = StringField(validators=[DataRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username"})
     password = PasswordField(validators=[DataRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Password"})
-    remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
-    
+
+# Change Password Form
+class ChangePasswordForm(FlaskForm):
+    username = StringField(validators=[DataRequired(), Length(min=4, max=20)], render_kw={"placeholder": "Username", "disabled": True})
+    current_password = PasswordField(validators = [DataRequired(), Length(min=1, max=200)], render_kw={"placeholder": "Current Password"})
+    new_password = PasswordField(validators=[DataRequired(), Length(min=4, max=20)], render_kw={"placeholder": "New Password"})
+    confirm_new_password = PasswordField(validators=[DataRequired(), Length(min=4, max=20), EqualTo('new_password', message='Both password fields must be equal!')], render_kw={"placeholder": "Confirm New Password"})
+    submit = SubmitField('Change Password')     
+
 # Add Post Form
 class Add_PostForm(FlaskForm):
     content = StringField(validators=[Length(max=300)], render_kw={"placeholder": "What's happening?"})
@@ -123,15 +130,18 @@ class Add_PostForm(FlaskForm):
     
 # New User Profile Form
 class MyProfileForm(FlaskForm):
-    description = StringField(validators=[DataRequired()], render_kw={"placeholder": "How would you describe yourself?"})
-    email = EmailField(validators=[DataRequired()], render_kw={"placeholder": 'Email'})
-    birthdate = DateField (validators=[DataRequired()], render_kw={"placeholder": 'Birthdate'})
+    description = StringField("Description", validators=[DataRequired()], render_kw={"placeholder": "How would you describe yourself?"})
+    email = EmailField("Email Address", validators=[DataRequired()], render_kw={"placeholder": 'Email'})
+    birthdate = DateField ("Birthdate", validators=[DataRequired()], render_kw={"placeholder": 'Birthdate'})
+    profile_pic = FileField("Upload", render_kw={"placeholder": 'Profile Picture'})
     submit = SubmitField("Update")
 #===============================================================================================================================================================================================================
 
 #All Routes
 #===============================================================================================================================================================================================================
 # Default route
+@app.route("/home", methods=["GET", "POST"])
+@app.route("/index", methods=["GET", "POST"])
 @app.route('/', methods=["GET", "POST"])
 @login_required
 def index():
@@ -167,10 +177,15 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data)
-        new_user = User(username = form.username.data, name = form.name.data, password = hashed_password)
+        new_username = form.username.data
+        new_user = User(username = new_username, name = form.name.data, password = hashed_password)
         db.session.add(new_user)
         db.session.commit()
-        return redirect(url_for('index'))    
+        new_created = User.query.filter_by(username = new_username).first()
+        new_id = new_created.id
+        session['messages'] = new_id
+        return redirect(url_for('new_profile'))
+        # return redirect(url_for('index'))
     return render_template('register.html', form=form)
 
 # Login Route
@@ -182,7 +197,11 @@ def login():
         if user:
             if bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user)
-                return redirect(url_for('index'))            
+                return redirect(url_for('index'))
+            else:
+                return render_template('login.html', form=form, password_error = "Incorrect password!!")
+        else:
+             return render_template('login.html', form=form, username_error = "Username does not exist!!")    
     return render_template('login.html', form=form)
 
 # Logout Route
@@ -192,18 +211,61 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-# New_Profile
+# Change Password Route
+@app.route("/change_password", methods=["GET", "POST"])
+@login_required
+def changepassword():
+    form = ChangePasswordForm()
+    form.username.data = current_user.username
+    if form.validate_on_submit():
+        user = User.query.filter_by(username = form.username.data).first()
+        if user:
+            if bcrypt.check_password_hash(user.password, form.current_password.data):
+                new_hashed_password = bcrypt.generate_password_hash(form.new_password.data)
+                user.password = new_hashed_password
+                db.session.commit()
+                return redirect(url_for('index'))
+    return render_template("changepassword.html", form=form)
+
+# New_Profile. This is only for new users signing up
+@app.route("/new_profile", methods = ["GET", "POST"])
+def new_profile():
+    try:
+        id = session['messages']
+    except KeyError:
+ # Returns a 403.html whihch does not exist to indicate that this page cannot be accessed by directly changing the url
+        return render_template('403.html')
+    form = MyProfileForm()
+    id = session['messages'] 
+    if form.validate_on_submit():
+        new_profile = User_Profile(description=form.description.data, email=form.email.data, Birthdate=form.birthdate.data, owner_id=id)
+        db.session.add(new_profile)
+        db.session.commit()
+        session.clear()
+        return redirect(url_for('index'))    
+    return render_template('First_Profile.html', form=form)
+
+# My_Profile
 @app.route("/my_profile", methods = ["GET", "POST"])
 @login_required
 def my_profile():
+    profile = User_Profile.query.filter_by(owner_id = current_user.id).first()
     form = MyProfileForm()
+    
+    form.description.data = profile.description
+    form.email.data = profile.email
+    # form.birthdate.data = profile.Birthdate
+    
     if form.validate_on_submit():
-        new_profile = User_Profile(description = form.description.data, email = form.email.data, Birthdate = form.birthdate.data, owner_id = current_user.id)
-        db.session.add(new_profile)
+        profile.description = form.description.data
+        profile.email = form.email.data
+        profile.Birthdate = form.birthdate.data
         db.session.commit()
-        return redirect(url_for('index'))    
-    return render_template('myprofile.html', form=form)
+        return redirect(url_for('my_profile'))
 
+    return render_template('myprofile.html', form=form, my_profile = profile)
+
+# Explore Route
 @app.route("/explore", methods = ["GET", "POST"])
 @login_required
 def explore():
