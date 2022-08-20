@@ -8,10 +8,10 @@ To create a basic version of web application which is in function like **Twitter
 ### Scope of the Project:
 1. Secure **Log-In** & **Log-out** functionality. ✅
 2. Register as a **New User**. ✅
-3. Have a **Profile Section** with personal decription, birth-date, Name, Profile picture, user_id, etc information.
+3. Have a **Profile Section** with personal decription, birth-date, Name, Profile picture, user_id, etc information. ✅
 4. Basic **Posting** function. ✅
 5. Ability to **Like & Dislike** posts.
-6. Ability to **Follow & Unfollow** other users.
+6. Ability to **Follow & Unfollow** other users. ✅
 7. Abiltity to **Explore** new users to follow. ✅
 8. **Personal Feed** based on who you follow.
 9. Function for **Forgot Password** & **Change Password**.
