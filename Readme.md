@@ -1,6 +1,6 @@
 # **Flask Micro-Blog Project**
 
-## This is my **CS50** Final Project
+## This is my **CS50** Final Project. (**The Project is still ongoing**)
 
 ### Aim of this Project:
 To create a basic version of web application which is in function like **Twitter** and allows user to create an account and post micro-blogs on the social media web-app.
@@ -13,8 +13,8 @@ To create a basic version of web application which is in function like **Twitter
 5. Ability to **Like & Dislike** posts.
 6. Ability to **Follow & Unfollow** other users. ✅
 7. Abiltity to **Explore** new users to follow. ✅
-8. **Personal Feed** based on who you follow.
-9. Function for **Forgot Password** & **Change Password**.
+8. **Personal Feed** based on who you follow. ✅
+9. Function for **Forgot Password** & **Change Password**. [x]
 10. Completely **Responsive** Web app so it can also be used on smaller screen devices.
 
 #### Major platforms/languages used for project:
