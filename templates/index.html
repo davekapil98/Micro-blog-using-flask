@@ -25,7 +25,7 @@ border-radius: 30px;
     <div class="postbox">
         <form method="post">
             <div class="postbox_input">
-                <img src="../static/Images/default_profile.webp" alt="" />
+                <img src="../static/images/uploads/{{user_pic}}" alt="" />
                 {{ form.hidden_tag() }}
                 {{ form.content() }}
             </div>
@@ -45,14 +45,14 @@ border-radius: 30px;
     <div class="post">
         <!--Profile Pic-->
         <div class="post_avatar">
-            <img src="../static/Images/default_profile.webp" alt="">
+            <img src="../static/images/uploads/{{post.profile_pic_url}}" alt="">
         </div>
         <!--Post Body-->
         <div class="post_body">
             <div class="post_header">
                 <div class="postheader_text">
-                    <h3>{{ post.author.name }}
-                        <span class="post_header_username">@{{ post.author.username }}</span>
+                    <h3>{{ post.author_name }}
+                        <span class="post_header_username">@{{ post.author_username }}</span>
                     </h3>
                 </div>
             </div>

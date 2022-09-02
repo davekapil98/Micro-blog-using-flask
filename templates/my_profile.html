@@ -23,13 +23,14 @@ border-radius: 30px;
     <!--Profile Pic & Name Section-->
     <div class="profile_pic_section">
         <div class="profile_pic">
-            <img src="../static/Images/default_profile.webp" alt="">
+            <img src="../static/images/uploads/{{ my_profile.profile_pic_url }}" alt="">
         </div>
         <button class="edit_button" id="edit-btn"><span class="material-symbols-outlined">edit</span></button>
         <div id="Edit_image" class="image_url_hidden">
-            <form action="{{url_for('my_profile')}}" method="post" enctype="multipart/form-data">
-                <span>{{ form.profile_pic(accept="image/*") }}</span>
-                {{ form.submit(class= "save-img") }}
+            <form method="post" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                {{ form.profile_pic_file }}
+                {{ form.submit(class="save-img")}}
                 <button type="reset" class="cancel-img" id="profile-cancel-btn">Cancel</button>
             </form>
         </div>
@@ -42,7 +43,7 @@ border-radius: 30px;
 
     <!--Profile Data-->
     <div class="profile_content">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <div class="loginid">
                 <h3>Username</h3>

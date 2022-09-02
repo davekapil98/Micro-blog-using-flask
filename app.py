@@ -8,6 +8,7 @@ from flask_wtf.file import FileField
 from wtforms.validators import DataRequired, Length, ValidationError, EqualTo
 from wtforms.widgets import TextArea
 from flask_bcrypt import Bcrypt
+from werkzeug.utils import secure_filename
 import uuid as uuid
 from datetime import datetime
 from config import Config
@@ -75,7 +76,7 @@ class Post(db.Model):
 class User_Profile(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     description = db.Column(db.String(300), nullable = True)
-    profile_pic_url = db.Column(db.String(), nullable = True)
+    profile_pic_url = db.Column(db.String(), nullable = True, default = 'default_profile.webp')
     email = db.Column(db.String(120), nullable=True)
     Birthdate = db.Column(db.DateTime, nullable = True)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -149,7 +150,7 @@ class MyProfileForm(FlaskForm):
     name = StringField("Name", validators = [DataRequired(), Length(min=1, max=200)], render_kw={"placeholder": "Name", 'disabled': 'disabled'})
     email = EmailField("Email Address", validators=[DataRequired()], render_kw={"placeholder": 'Email', 'disabled': 'disabled'})
     birthdate = DateField ("Birthdate", format='%Y-%m-%d', validators=[DataRequired()], render_kw={"placeholder": 'Birthdate', 'disabled': 'disabled'})
-    profile_pic = FileField("Upload", render_kw={"placeholder": 'Profile Picture'})
+    profile_pic_file = FileField("Profile Pic")
     submit = SubmitField("Update")
 
 # Follow & Unfollow Buttons
@@ -179,6 +180,7 @@ class RemoveUnfollowForm(FlaskForm):
 def index():
     # Add new post
     form = Add_PostForm()
+    user_profile_pic = (User_Profile.query.filter_by(owner_id = current_user.id).first()).profile_pic_url
     if form.validate_on_submit():
 
         # Check if image is added or not
@@ -210,9 +212,19 @@ def index():
     # Sort the posts in LIFO order to see lastest posts on the top.
     new_posts = []
     for post in all_posts:
-        new_posts.insert(0,post)
+        new_post = {
+            'id' : post.id,
+            'content': post.content,
+            'author_id': post.author_id,
+            'image_url': post.image_url,
+            'video_url': post.video_url,
+            'author_name': post.author.name,
+            'author_username': post.author.username,
+            'profile_pic_url': (User_Profile.query.filter_by(owner_id = post.author_id).first()).profile_pic_url
+        }
+        new_posts.insert(0,new_post)
 
-    return render_template('index.html', form=form, posts = new_posts)
+    return render_template('index.html', form=form, posts = new_posts, user_pic = user_profile_pic)
 
 #Register Route
 @app.route("/register", methods=["GET", "POST"])
@@ -274,13 +286,24 @@ def changepassword():
 @login_required
 def explore():
     form = Add_PostForm()
+    user_profile_pic = (User_Profile.query.filter_by(owner_id = current_user.id).first()).profile_pic_url
     posts = Post.query.all()
     # Sort the posts in LIFO order to see lastest posts on the top.
     new_posts = []
     for post in posts:
-        new_posts.insert(0,post)
+        new_post = {
+            'id' : post.id,
+            'content': post.content,
+            'author_id': post.author_id,
+            'image_url': post.image_url,
+            'video_url': post.video_url,
+            'author_name': post.author.name,
+            'author_username': post.author.username,
+            'profile_pic_url': (User_Profile.query.filter_by(owner_id = post.author_id).first()).profile_pic_url
+        }
+        new_posts.insert(0,new_post)
 
-    return render_template('explore.html', form=form, posts = new_posts)
+    return render_template('explore.html', form=form, posts = new_posts, user_pic = user_profile_pic)
 
 # New_Profile. This is only for new users signing up
 @app.route("/new_profile", methods = ["GET", "POST"])
@@ -306,21 +329,24 @@ def new_profile():
 def my_profile():
     profile = User_Profile.query.filter_by(owner_id = current_user.id).first()
     form = MyProfileForm(description = profile.description, birthdate = profile.Birthdate, name = profile.user_user.name, email = profile.email)
-
+    
     if form.validate_on_submit():
         new_name = form.name.data
         profile.user_user.name = new_name
         profile.description = form.description.data
         profile.email = form.email.data
         profile.Birthdate = form.birthdate.data
-        
+        if form.profile_pic_file.data:
+            filename = secure_filename(form.profile_pic_file.data.filename)
+            new_filename = (str(uuid.uuid1()) + filename)
+            form.profile_pic_file.data.save('static/images/uploads/' + new_filename)
+            profile.profile_pic_url= new_filename
         try:
             db.session.commit()
-            return redirect(url_for('my_profile'))
         except:
             return redirect(url_for('index'))
 
-    return render_template('my_profile.html', form=form, my_profile = profile)
+    return render_template('my_profile.html', form=form, my_profile = profile, )
 
 # View all other user's profiles
 @app.route('/profile/<username>', methods = ["GET", "POST"])
@@ -358,6 +384,7 @@ def user_profile(username):
 @login_required
 def account():
     form = Account()
+    profile = User_Profile.query.filter_by(owner_id = current_user.id).first()
     if form.validate_on_submit():
         if form.change_password.data:
             return redirect(url_for('changepassword'))
@@ -365,20 +392,30 @@ def account():
             session['messages'] = current_user.id
             return redirect(url_for('deleteaccount'))
     
-    return render_template("account.html", form=form, name = current_user.name)
+    return render_template("account.html", form=form, profile = profile)
 
 # Follower List
 @app.route ("/followers", methods = ["GET", "POST"])
 @login_required
 def followers():
     form = RemoveUnfollowForm()
+    profile = User_Profile.query.filter_by(owner_id = current_user.id).first()
     followers = Follow.query.filter_by(follower_id = current_user.id).all()
     following = Follow.query.filter_by(users_id = current_user.id).all()
     follower_number = len(followers)
     following_number = len(following)
+        
     all_followers_data = []
+    
     for follow in followers:
-        all_followers_data.append (User.query.filter_by(id = follow.users_id).first())
+        follow_info = {}
+        user_info = (User.query.filter_by(id = follow.users_id).first())
+        user_profile = User_Profile.query.filter_by(owner_id = follow.users_id).first()
+        follow_info['id'] = user_info.id
+        follow_info ['profile_pic_url'] = user_profile.profile_pic_url
+        follow_info ['name'] = user_info.name
+        follow_info['username'] = user_info.username
+        all_followers_data.append(follow_info)
     
     if request.method == "POST" or form.validate_on_submit():
         username_id = form.user_id.data
@@ -387,27 +424,38 @@ def followers():
         db.session.commit()
         return redirect(url_for('followers'))
     
-    return render_template("follower.html", form=form, followers = all_followers_data, follower_number = follower_number, following_number = following_number, users_name = current_user.name)
+    return render_template("follower.html", form=form, profile = profile, followers = all_followers_data, follower_number = follower_number, following_number = following_number, users_name = current_user.name)
 
 # Following List
 @app.route ("/following", methods = ["GET", "POST"])
 @login_required
 def following():
     form = RemoveUnfollowForm()
+    profile = User_Profile.query.filter_by(owner_id = current_user.id).first()
     followers = Follow.query.filter_by(follower_id = current_user.id).all()
     following = Follow.query.filter_by(users_id = current_user.id).all()
     follower_number = len(followers)
     following_number = len(following)
     all_following_data = []
+    
     for follow in following:
-        all_following_data.append (User.query.filter_by(id = follow.follower_id).first())
+        follow_info = {}
+        user_info = (User.query.filter_by(id = follow.follower_id).first())
+        user_profile = User_Profile.query.filter_by(owner_id = follow.follower_id).first()
+        follow_info['id'] = user_info.id
+        follow_info ['profile_pic_url'] = user_profile.profile_pic_url
+        follow_info ['name'] = user_info.name
+        follow_info['username'] = user_info.username
+        all_following_data.append(follow_info)
+        
+    
     if request.method == "POST" or form.validate_on_submit():
         username_id = form.user_id.data
         unfollow = Follow.query.filter_by(users_id = current_user.id, follower_id = username_id).first()
         db.session.delete(unfollow)
         db.session.commit()
         return redirect(url_for('following'))     
-    return render_template("following.html", form = form, following = all_following_data, follower_number = follower_number, following_number = following_number, users_name = current_user.name)
+    return render_template("following.html", form = form, profile = profile, following = all_following_data, follower_number = follower_number, following_number = following_number, users_name = current_user.name)
 
 # Permenant Account Delete
 @app.route ("/delete_account", methods = ["GET", "POST"])

@@ -23,10 +23,10 @@ border-radius: 30px;
     <!--Profile Pic & Name Section-->
     <div class="profile_pic_section">
         <div class="profile_pic">
-            <img src="../static/Images/default_profile.webp" alt="">
+            <img src="../static/images/uploads/{{profile.profile_pic_url}}" alt="">
         </div>
         <div class="accountname">
-            <h2>{{ users_name }}</h2>
+            <h2>{{ profile.user_user.name }}</h2>
             <div class="follower_following">
                 <div class="now_watching activecolor"><a href="{{url_for('followers')}}">{{ follower_number }}
                         Followers</a></div>
@@ -41,7 +41,7 @@ border-radius: 30px;
         <table>
             {% for person in followers %}
             <tr>
-                <th class="avatar_pic"><img src="../static/Images/default_profile.webp" alt="" /></th>
+                <th class="avatar_pic"><img src="../static/images/uploads/{{person.profile_pic_url}}" alt="" /></th>
                 <th class="avatar_name">{{ person.name }} <span>@{{ person.username }}</span></th>
                 <th>
                     <form action="{{url_for('followers')}}" method="post" name = {{person.username}}>

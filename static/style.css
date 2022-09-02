@@ -159,6 +159,7 @@ body {
     font-size: 20px;
     border: none;
     outline: none;
+    font-family: inherit;
 }
 
 .post_button {
@@ -171,6 +172,7 @@ body {
     height: 40px;
     margin-top: 10px;
     margin-left: auto;
+    font-family: inherit;
 }
 
 /*posts*/
@@ -311,6 +313,7 @@ body {
     border-radius: 50%;
     height: 300px;
     margin-top: 20px;
+    width: 300px;
 }
 
 .edit_button {
@@ -660,6 +663,8 @@ body {
     background-color: #DC3545;
     border-radius: 10px;
     color: white;
+    border: none;
+    outline: none;
 }
 
 @media screen and (max-width: 768px) {
