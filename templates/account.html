@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Account
+{% endblock %}
+
+{% block style %}
+<style>
+.account {
+background-color: #e6ecf0;
+color: #6C63FF;
+border-radius: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<!--Profile Section-->
+<div class="profile_page">
+    <div class="profile_header">
+        <h2>Account Settings</h2>
+    </div>
+    <!--Profile Pic & Name Section-->
+    <div class="profile_pic_section">
+        <div class="profile_pic">
+            <img src="../static/Images/default_profile.webp" alt="">
+        </div>
+        <div class="username">
+            <h2>{{ name }}</h2>
+        </div>
+    </div>
+    <!--End of Profile Pic & Name Section-->
+    <div class="account_content">
+        <form action="{{url_for('account')}}" method="post">
+            {{ form.hidden_tag() }}
+            {{ form.change_password(class="changepassword")}}
+            {{ form.delete_account(class="delete", onclick="return confirm('Are you sure you want to delete this item')")}}
+        </form>
+    </div>
+    {% endblock %}

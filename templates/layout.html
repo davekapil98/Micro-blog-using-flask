@@ -1,82 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/main.css">
+    <link rel="stylesheet" href="../static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css" integrity="sha512-1sCRPdkRXhBV2PBLUdRb4tMg1w2YPf37qatUFeS7zlBy7jJI8Lf4VHwWfZZfpXtYSLy85pkm9GaYVYMfw5BC1A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title>{% block title %}{% endblock %}</title>
+    {% block style %}{% endblock %}
 </head>
+
 <body>
-    <div class="wrapper">
-    <!--Left sidebar-->
-            <aside class="sidebar">
-            <ul>
-                <li>
-                    <div class="sidebartitle">
-                    <span class="material-symbols-outlined">hub</span>
-                    <h2>Micro-Blog</h2>
-                    </div>
-                </li>
-                <li>
-                    <a href="{{url_for('index')}}">
-                        <div class="sidebarOption active">
-                            <span class="material-symbols-outlined">home_app_logo</span>
-                            <h2>Home</h2>
-                        </div>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{url_for('explore')}}">
-                        <div class="sidebarOption">
-                            <span class="material-symbols-outlined">explore</span>
-                            <h2>Explore</h2>
-                        </div>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{url_for('my_profile')}}">
-                        <div class="sidebarOption">
-                            <span class="material-symbols-outlined">account_circle</span>
-                            <h2>Profile</h2>
-                        </div>
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <div class="sidebarOption">
-                            <span class="material-symbols-outlined">group</span>
-                            <h2>Followers</h2>
-                        </div>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{url_for('logout')}}">
-                        <div class="sidebarOption">
-                            <span class="material-symbols-outlined"> logout </span>
-                            <h2>Logout</h2>
-                        </div>
-                    </a>
-                </li>
-            </ul>
-        </aside>
-    <!--Left sidebar ends-->
+<!--Sidebar section-->
+<div class="sidebar">
+    <a href="{{url_for('index')}}">
+        <div class="sidebartitle">
+            <span class="material-symbols-outlined ">hub</span>
+            <h2>Micro-Blog</h2>
+        </div>
+    </a>
+    <a href="{{url_for('index')}}">
+        <div class="sidebarOption home">
+            <span class="material-symbols-outlined">home_app_logo</span>
+            <h2>Home</h2>
+        </div>
+    </a>
+    <a href="{{url_for('explore')}}">
+        <div class="sidebarOption explore">
+            <span class="material-symbols-outlined">explore</span>
+            <h2>Explore</h2>
+        </div>
+    </a>
+    <a href="{{url_for('my_profile')}}">
+        <div class="sidebarOption profile">
+            <span class="material-symbols-outlined">account_circle</span>
+            <h2>Profile</h2>
+        </div>
+    </a>
+    <a href="{{url_for('followers')}}">
+        <div class="sidebarOption followers">
+            <span class="material-symbols-outlined">group</span>
+            <h2>Followers</h2>
+        </div>
+    </a>
+    <a href="{{url_for('account')}}">
+        <div class="sidebarOption account">
+            <span class="material-symbols-outlined">manage_accounts</span>
+            <h2>Account</h2>
+        </div>
+    </a>
+    <a href="{{url_for('logout')}}">
+        <div class="sidebarOption">
+            <span class="material-symbols-outlined">logout</span>
+            <h2>Logout</h2>
+        </div>
+    </a>
+</div>
+<!--End of Sidebar section-->
+<!---------------------------------------------------------------------------------------------------------------------->
+<!--Main Content-->
+{% block main %}{% endblock %}
+<!--End of Main Content-->
 
-    <!--Main Feed-->
-    <main>
-        <div class="feed">
-    {% block PostHeader %}{% endblock %}
-                <!--Add Post Ends-->
-
-                <!--Posts-->
-                {% block main %}{% endblock %}
-            <!--Post ends-->
-            </div>
-        </main>
-    <!--Main feed posting ends-->
-    </div>
-    <script src="../static/main.js"></script>
+<script src="../static/main.js"></script>
 </body>
+
 </html>

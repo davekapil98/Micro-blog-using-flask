@@ -4,8 +4,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, EmailField, DateField, URLField, FileField
+from flask_wtf.file import FileField
 from wtforms.validators import DataRequired, Length, ValidationError, EqualTo
+from wtforms.widgets import TextArea
 from flask_bcrypt import Bcrypt
+import uuid as uuid
 from datetime import datetime
 from config import Config
 
@@ -51,7 +54,7 @@ class User(db.Model, UserMixin):
     date_created = db.Column(db.DateTime, default = datetime.utcnow)
     posts = db.relationship('Post', backref='author', lazy = True)
     user_profile = db.relationship('User_Profile', backref='user_user', lazy = True)
-    followers = db.relationship('Follow', backref='following', lazy = True)
+    all_following = db.relationship('Follow', backref='following', lazy = True)
 
     def __repr__(self):
         return f"User('{self.username}', '{self.name}', '{self.date_created}')"
@@ -60,9 +63,8 @@ class User(db.Model, UserMixin):
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     content = db.Column(db.String(300), nullable = True)
-    content_url = db.Column(db.String(), nullable = True)
-    likes = db.Column(db.Integer, default = 0)
-    dislikes = db.Column(db.Integer, default = 0)
+    image_url = db.Column(db.String(), nullable = True)
+    video_url = db.Column(db.String(), nullable = True)
     post_date = db.Column(db.DateTime, default = datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
@@ -75,13 +77,13 @@ class User_Profile(db.Model):
     description = db.Column(db.String(300), nullable = True)
     profile_pic_url = db.Column(db.String(), nullable = True)
     email = db.Column(db.String(120), nullable=True)
-    Birthdate = db.Column(db.Text, nullable = True)
+    Birthdate = db.Column(db.DateTime, nullable = True)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
         return f"User_Profile('{self.description}', '{self.profile_pic_url}', '{self.email}', '{self.Birthdate}', '{self.post_date}')"
 
-# Table to track follower list and following list
+# Table to track following list and following list
 class Follow(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     follower_id = db.Column(db.Integer, nullable = False)
@@ -129,15 +131,24 @@ class ChangePasswordForm(FlaskForm):
 
 # Add Post Form
 class Add_PostForm(FlaskForm):
-    content = StringField(validators=[Length(max=300)], render_kw={"placeholder": "What's happening?"})
-    upload = URLField('Image URL', render_kw={"placeholder": "Image URL"})
+    content = StringField(validators=[Length(max=300)], render_kw={"placeholder": "What's happening?"}, widget=TextArea())
+    image_url = URLField('Image URL', render_kw={"placeholder": "Image URL"})
+    video_url = URLField('Video URL', render_kw={"placeholder": "Video URL"})
     submit = SubmitField('Post')
 
 # New User Profile Form
-class MyProfileForm(FlaskForm):
-    description = StringField("Description", validators=[DataRequired()], render_kw={"placeholder": "How would you describe yourself?"})
+class NewUserForm(FlaskForm):
+    description = StringField("Description", validators=[DataRequired()], render_kw={"placeholder": "How would you describe yourself?"}, widget=TextArea())
     email = EmailField("Email Address", validators=[DataRequired()], render_kw={"placeholder": 'Email'})
     birthdate = DateField ("Birthdate", validators=[DataRequired()], render_kw={"placeholder": 'Birthdate'})
+    submit = SubmitField("Update")
+    
+# My Profile Form
+class MyProfileForm(FlaskForm):
+    description = StringField("Description", validators=[DataRequired()], render_kw={"placeholder": "How would you describe yourself?", 'disabled': 'disabled'}, widget=TextArea())
+    name = StringField("Name", validators = [DataRequired(), Length(min=1, max=200)], render_kw={"placeholder": "Name", 'disabled': 'disabled'})
+    email = EmailField("Email Address", validators=[DataRequired()], render_kw={"placeholder": 'Email', 'disabled': 'disabled'})
+    birthdate = DateField ("Birthdate", format='%Y-%m-%d', validators=[DataRequired()], render_kw={"placeholder": 'Birthdate', 'disabled': 'disabled'})
     profile_pic = FileField("Upload", render_kw={"placeholder": 'Profile Picture'})
     submit = SubmitField("Update")
 
@@ -145,6 +156,17 @@ class MyProfileForm(FlaskForm):
 class FollowUnfollowForm(FlaskForm):
     follow = SubmitField("Follow")
     unfollow = SubmitField("Unfollow")
+    
+# Account Page Buttons
+class Account(FlaskForm):
+    change_password = SubmitField("Change Password")
+    delete_account = SubmitField("Delete Account")
+    
+# Remove & Unfollow Buttons
+class RemoveUnfollowForm(FlaskForm):
+    remove = SubmitField("Remove")
+    unfollow = SubmitField("Unfollow")
+    user_id = StringField(validators=[DataRequired()])
 #===============================================================================================================================================================================================================
 
 #All Routes
@@ -160,19 +182,30 @@ def index():
     if form.validate_on_submit():
 
         # Check if image is added or not
-        if form.upload.data:
-            url = form.upload.data
+        if form.image_url.data:
+            image_url = form.image_url.data
         else:
-            url = None
+            image_url = None
+        
+        # Check if video is added or not
+        if form.video_url.data:
+            video_url = form.video_url.data
+        else:
+            video_url = None
 
         # Add the data of post to the database
-        add_post = Post(content = form.content.data, author_id = current_user.id, content_url = url)
+        add_post = Post(content = form.content.data, author_id = current_user.id, image_url = image_url, video_url = video_url)
         db.session.add(add_post)
         db.session.commit()
         return redirect(url_for('index'))
 
-    # Get all posts from the database
-    all_posts = Post.query.filter_by(author_id = current_user.id).all()
+    # Get all posts from the database of both user and the other users they are following
+    following_list = []
+    all_followings = Follow.query.filter_by(users_id = current_user.id).all()
+    for following in all_followings:
+        following_list.append(following.follower_id)
+    following_list.insert(0, current_user.id)
+    all_posts = Post.query.filter(Post.author_id.in_(following_list)).all()
 
     # Sort the posts in LIFO order to see lastest posts on the top.
     new_posts = []
@@ -195,7 +228,6 @@ def register():
         new_id = new_created.id
         session['messages'] = new_id
         return redirect(url_for('new_profile'))
-        # return redirect(url_for('index'))
     return render_template('register.html', form=form)
 
 # Login Route
@@ -258,7 +290,7 @@ def new_profile():
     except KeyError:
  # Returns a 403.html whihch does not exist to indicate that this page cannot be accessed by directly changing the url
         return render_template('403.html')
-    form = MyProfileForm()
+    form = NewUserForm()
     id = session['messages']
     if form.validate_on_submit():
         new_profile = User_Profile(description=form.description.data, email=form.email.data, Birthdate=form.birthdate.data, owner_id=id)
@@ -266,27 +298,29 @@ def new_profile():
         db.session.commit()
         session.clear()
         return redirect(url_for('index'))
-    return render_template('First_Profile.html', form=form)
+    return render_template('first_profile.html', form=form)
 
 # My_Profile
 @app.route("/my_profile", methods = ["GET", "POST"])
 @login_required
 def my_profile():
     profile = User_Profile.query.filter_by(owner_id = current_user.id).first()
-    form = MyProfileForm()
-
-    form.description.data = profile.description
-    form.email.data = profile.email
-    # form.birthdate.data = profile.Birthdate
+    form = MyProfileForm(description = profile.description, birthdate = profile.Birthdate, name = profile.user_user.name, email = profile.email)
 
     if form.validate_on_submit():
+        new_name = form.name.data
+        profile.user_user.name = new_name
         profile.description = form.description.data
         profile.email = form.email.data
         profile.Birthdate = form.birthdate.data
-        db.session.commit()
-        return redirect(url_for('my_profile'))
+        
+        try:
+            db.session.commit()
+            return redirect(url_for('my_profile'))
+        except:
+            return redirect(url_for('index'))
 
-    return render_template('myprofile.html', form=form, my_profile = profile)
+    return render_template('my_profile.html', form=form, my_profile = profile)
 
 # View all other user's profiles
 @app.route('/profile/<username>', methods = ["GET", "POST"])
@@ -317,7 +351,90 @@ def user_profile(username):
             db.session.commit()
             return redirect(url_for('user_profile', username = username))
     profile = User_Profile.query.filter_by(owner_id = user_profile.id).first()
-    return render_template("users_profile.html", profile = profile, form=form, following = following)    
+    return render_template("users_profile.html", profile = profile, form = form, following = following)
+
+# Account Settings
+@app.route("/account", methods = ["GET", "POST"])
+@login_required
+def account():
+    form = Account()
+    if form.validate_on_submit():
+        if form.change_password.data:
+            return redirect(url_for('changepassword'))
+        elif form.delete_account.data:
+            session['messages'] = current_user.id
+            return redirect(url_for('deleteaccount'))
+    
+    return render_template("account.html", form=form, name = current_user.name)
+
+# Follower List
+@app.route ("/followers", methods = ["GET", "POST"])
+@login_required
+def followers():
+    form = RemoveUnfollowForm()
+    followers = Follow.query.filter_by(follower_id = current_user.id).all()
+    following = Follow.query.filter_by(users_id = current_user.id).all()
+    follower_number = len(followers)
+    following_number = len(following)
+    all_followers_data = []
+    for follow in followers:
+        all_followers_data.append (User.query.filter_by(id = follow.users_id).first())
+    
+    if request.method == "POST" or form.validate_on_submit():
+        username_id = form.user_id.data
+        remove = Follow.query.filter_by(users_id = username_id, follower_id = current_user.id).first()
+        db.session.delete(remove)
+        db.session.commit()
+        return redirect(url_for('followers'))
+    
+    return render_template("follower.html", form=form, followers = all_followers_data, follower_number = follower_number, following_number = following_number, users_name = current_user.name)
+
+# Following List
+@app.route ("/following", methods = ["GET", "POST"])
+@login_required
+def following():
+    form = RemoveUnfollowForm()
+    followers = Follow.query.filter_by(follower_id = current_user.id).all()
+    following = Follow.query.filter_by(users_id = current_user.id).all()
+    follower_number = len(followers)
+    following_number = len(following)
+    all_following_data = []
+    for follow in following:
+        all_following_data.append (User.query.filter_by(id = follow.follower_id).first())
+    if request.method == "POST" or form.validate_on_submit():
+        username_id = form.user_id.data
+        unfollow = Follow.query.filter_by(users_id = current_user.id, follower_id = username_id).first()
+        db.session.delete(unfollow)
+        db.session.commit()
+        return redirect(url_for('following'))     
+    return render_template("following.html", form = form, following = all_following_data, follower_number = follower_number, following_number = following_number, users_name = current_user.name)
+
+# Permenant Account Delete
+@app.route ("/delete_account", methods = ["GET", "POST"])
+@login_required
+def deleteaccount():
+        try:
+            user_id = session['messages']
+        except KeyError:
+            # Returns a 403.html whihch does not exist to indicate that this page cannot be accessed by directly changing the url
+            return render_template('403.html')
+        
+        user_info = User.query.filter_by(id = current_user.id).first()
+        all_posts = Post.query.filter_by(author_id = current_user.id).all()
+        following_users = Follow.query.filter_by(users_id = current_user.id).all()
+        users_following = Follow.query.filter_by(follower_id = current_user.id).all()
+        users_profile = User_Profile.query.filter_by(owner_id = current_user.id).first()
+        db.session.delete(user_info)
+        for post in all_posts:
+            db.session.delete(post)
+        for user in users_following:
+            db.session.delete(user)
+        for user in following_users:
+            db.session.delete(user)
+        db.session.delete(users_profile)
+        db.session.commit()
+        session.clear()
+        return redirect(url_for('logout'))
 
 #===============================================================================================================================================================================================================
 

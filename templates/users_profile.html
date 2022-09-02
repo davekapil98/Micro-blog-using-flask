@@ -4,40 +4,59 @@
 Profile
 {% endblock %}
 
-{% block PostHeader %} 
-    <h1>My Profile</h1>
-    <div>
-        <h3>Name</h3>
-        <p>{{ profile.user_user.name}}</p>
+{% block main %}
+<!--Profile Section-->
+<div class="profile_page">
+    <div class="profile_header">
+        <h2>Profile Page</h2>
     </div>
-    <div>
-        <h3>Username</h3>
-        <p>{{ profile.user_user.username}}</p>
+    <!--Profile Pic & Name Section-->
+    <div class="profile_pic_section">
+        <div class="profile_pic">
+            <img src="../static/Images/default_profile.webp" alt="">
+        </div>
+        <div class="username otherprofile">
+            <h2>{{ profile.user_user.name }}</h2>
+            <form method="post">
+                {{ form.hidden_tag() }}
+                {% if following %}
+                {{ form.unfollow(class = "unfollow") }}
+                {% else %}
+                {{ form.follow(class = "follow") }}
+                {% endif %}
+            </form>
+        </div>
     </div>
-    <div>
-        <h3>Email Address</h3>
-        <p>{{ profile.email}}</p>
+    <!--End of Profile Pic & Name Section-->
+
+    <!--Profile Data-->
+    <div class="profile_content">
+        <div class="loginid">
+            <h3>Username</h3>
+            <p>@{{ profile.user_user.username }}</p>
+        </div>
+        <br>
+        <div class="nickname">
+            <h3>Name</h3>
+            <p>{{ profile.user_user.name }}</p>
+        </div>
+        <br>
+        <div class="emailid">
+            <h3>Email ID</h3>
+            <p>{{ profile.email }}</p>
+        </div>
+        <br>
+        <div class="birthdate">
+            <h3>Birthdate</h3>
+            <p>{{ profile.Birthdate }}</p>
+        </div>
+        <br>
+        <div class="description">
+            <h3>Description</h3>
+            <p>L{{ profile.description }}</p>
+        </div>
+        <br>
+        <br>
     </div>
-    <div>
-        <h3>Birthdate</h3>
-        <p>{{ profile.Birthdate}}</p>
-    </div>
-    <div>
-        <h3>Profile Pic Url</h3>
-        <p>{{ profile.profile_pic_url}}</p>
-    </div>
-    <div>
-        <h3>Description</h3>
-        <p>{{ profile.description}}</p>
-    </div>
-    <div>
-        <form method="post">
-        {{ form.hidden_tag() }}
-        {% if following %}
-            {{ form.unfollow() }}
-        {% else %}    
-            {{ form.follow() }}
-        {% endif %}
-        </form>
-    </div>
-    {% endblock %}
+</div>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends "layout.html" %}
+
+{% block title %}
+My Profile
+{% endblock %}
+
+{% block style %}
+<style>
+.profile {
+background-color: #e6ecf0;
+color: #6C63FF;
+border-radius: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block main %} 
+<!--Profile Section-->
+<div class="profile_page">
+    <div class="profile_header">
+        <h2>My Profile Page</h2>
+    </div>
+    <!--Profile Pic & Name Section-->
+    <div class="profile_pic_section">
+        <div class="profile_pic">
+            <img src="../static/Images/default_profile.webp" alt="">
+        </div>
+        <button class="edit_button" id="edit-btn"><span class="material-symbols-outlined">edit</span></button>
+        <div id="Edit_image" class="image_url_hidden">
+            <form action="{{url_for('my_profile')}}" method="post" enctype="multipart/form-data">
+                <span>{{ form.profile_pic(accept="image/*") }}</span>
+                {{ form.submit(class= "save-img") }}
+                <button type="reset" class="cancel-img" id="profile-cancel-btn">Cancel</button>
+            </form>
+        </div>
+        <div class="username">
+            <h2>{{ my_profile.user_user.name}}</h2>
+        </div>
+
+    </div>
+    <!--End of Profile Pic & Name Section-->
+
+    <!--Profile Data-->
+    <div class="profile_content">
+        <form method="post">
+            {{ form.hidden_tag() }}
+            <div class="loginid">
+                <h3>Username</h3>
+                <p>{{ my_profile.user_user.username}}</p>
+            </div>
+            <br>
+            <div class="nickname">
+                <button class="edit" id="name-btn" type="button"><span
+                        class="material-symbols-outlined">edit</span></button>
+                <h3>Name</h3>
+                <div class="datawithbtn">
+                    {{ form.name(class = "text-deco")}}
+                    {{ form.submit(class="save-btn", id="save-btn")}}
+                    <button type="reset" class="cancel-btn" id="cancel-btn">Cancel</button>
+                </div>
+            </div>
+            <br>
+            <div class="emailid">
+                <button class="edit" id="email-btn" type="button"><span
+                        class="material-symbols-outlined">edit</span></button>
+                <h3>Email ID</h3>
+                <div class="datawithbtn">
+                    {{ form.email(class = "text-deco")}}
+                    {{ form.submit(class="save-btn", id="save-btn1")}}
+                    <button type="reset" class="cancel-btn" id="cancel-btn1">Cancel</button>
+                </div>
+            </div>
+            <br>
+            <div class="birthdate">
+                <button class="edit" id="birthdate-btn" type="button"><span
+                        class="material-symbols-outlined">edit</span></button>
+                <h3>Birthdate</h3>
+                <div class="datawithbtn">
+                    {{ form.birthdate(class = "text-deco")}}
+                    {{ form.submit(class="save-btn", id="save-btn2")}}
+                    <button type="reset" class="cancel-btn" id="cancel-btn2">Cancel</button>
+                </div>
+            </div>
+            <br>
+            <div class="description">
+                <button class="edit" id="description-btn" type="button"><span
+                        class="material-symbols-outlined">edit</span></button>
+                <h3>Description</h3>
+                <div class="datawithbtn">
+                    {{ form.description(class = "text-deco")}}
+                    {{ form.submit(class="save-btn", id="save-btn3")}}
+                    <button type="reset" class="cancel-btn" id="cancel-btn3">Cancel</button>
+                </div>
+            </div>
+            <br>
+            <br>
+        </form>
+    </div>
+    <!--End of Profile-->
+    {% endblock %}

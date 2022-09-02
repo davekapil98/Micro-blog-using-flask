@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../static/login.css">
-    <title>Change Password</title>
+    <title>Register</title>
 </head>
 <body>
     <div class="container">
@@ -13,25 +13,26 @@
             <div class="screen__content">
                 <form class="register" method="post">
                     {{ form.hidden_tag() }}
-                    
+                    <br>
+                    <br>
                     <div class="login__field">
-                        {{ form.username(size=32, class="login__input") }} 
+                        {{ form.description.label(class="form-control") }}
+                        {{ form.description(class="login__input") }} 
                     </div>
 
                     <div class="login__field">
-                        {{ form.current_password(size=32, class="login__input") }} 
+                        {{ form.email.label() }}
+                        {{ form.email(size=32, class="login__input") }}
                     </div>
 
                     <div class="login__field">
-                        {{ form.new_password(size=32, class="login__input") }}
-                    </div>
-
-                    <div class="login__field">
-                        {{ form.confirm_new_password(size=32, class="login__input") }}
+                        {{ form.birthdate.label() }}
+                        {{ form.birthdate(class="login__input") }}
                     </div>
 
                      <p>{{ form.submit(class="button login__submit") }}</p>
-                </form>               
+                </form>
+                
             </div>
             <div class="screen__background">
                 <span class="screen__background__shape screen__background__shape4"></span>

@@ -1,56 +1,73 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Index
+Micro-Blog
+{% endblock %}
+
+{% block style %}
+<style>
+.home {
+background-color: #e6ecf0;
+color: #6C63FF;
+border-radius: 30px;
+    }
+</style>
 {% endblock %}
 
 <!--Header & Add posts-->
-{% block PostHeader %} 
-        <div class="feed_header">
-            <h2>Welcome!!!</h2>
-        </div>
-        <!--Blog Post Starts-->
-        <div class="blogbox">
-            <form method="post">
-                <div class="bloginput">                            
-                    <img src="../static/Images/default_profile.webp" alt=""/>
-                    {{ form.hidden_tag() }}
-                    {{ form.content(class="blogadd_input") }}
-                </div>
-                <div class="bloginput">
-                    {{ form.upload(class="blogbox_input") }}
-                </div>
-                {{ form.submit(class="blogbox_button") }}
-            </form>
-        </div>
-{% endblock %}
-
-<!--Posts-->
 {% block main %}
-{% for post in posts %}
-<div class="post">
-    <div class="post_avatar">
-        <img src="..//static/Images/default_profile.webp" alt="">
+<!--Add Post & Feed Area-->
+<div class="feed">
+    <div class="feed_header">
+        <h2>Home</h2>
     </div>
+    <!--Post Box-->
+    <div class="postbox">
+        <form method="post">
+            <div class="postbox_input">
+                <img src="../static/Images/default_profile.webp" alt="" />
+                {{ form.hidden_tag() }}
+                {{ form.content() }}
+            </div>
+            <div class="extra_content">
+                <span class="material-symbols-outlined">image</span>
+                <span>{{ form.image_url() }}</span>
+                <span class="material-symbols-outlined">movie</span>
+                <span>{{ form.video_url() }}</span>
+            </div>
+            {{ form.submit(class="post_button") }}
+        </form>
+    </div>
+    <!--End of Post box-->
 
-    <div class="post_body">
-        <div class="post_header">
-            <div class="post_headerText">
-                <h3>
-                    {{ post.author.name }}
-                    <span class="post_headerSpecial">
-                        <span></span>@{{ post.author.username }}
-                    </span>
-                </h3>
+    <!--Post Section-->
+    {% for post in posts %}
+    <div class="post">
+        <!--Profile Pic-->
+        <div class="post_avatar">
+            <img src="../static/Images/default_profile.webp" alt="">
+        </div>
+        <!--Post Body-->
+        <div class="post_body">
+            <div class="post_header">
+                <div class="postheader_text">
+                    <h3>{{ post.author.name }}
+                        <span class="post_header_username">@{{ post.author.username }}</span>
+                    </h3>
+                </div>
             </div>
             <div class="post_content">
                 <p>
                     {{ post.content }}
                 </p>
             </div>
+            {% if post.image_url != None %}
+            <img src = "{{ post.image_url }}" alt=""/>
+            <br>
+            {% elif post.video_url != None %}
+            <iframe src="{{ post.video_url }}"> </iframe>
+            {% endif %}
         </div>
-        <img src = {{ post.content_url }} alt=""/>
     </div>
-</div>
-{% endfor %}
-{% endblock %}
+    {% endfor %}
+    {% endblock %}

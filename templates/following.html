@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Following
+{% endblock %}
+
+{% block style %}
+<style>
+.followers {
+background-color: #e6ecf0;
+color: #6C63FF;
+border-radius: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block main %}
+<!--Profile Section-->
+<div class="profile_page">
+    <div class="profile_header">
+        <h2>Accounts Following</h2>
+    </div>
+    <!--Profile Pic & Name Section-->
+    <div class="profile_pic_section">
+        <div class="profile_pic">
+            <img src="../static/Images/default_profile.webp" alt="">
+        </div>
+        <div class="accountname">
+            <h2>{{ users_name }}</h2>
+            <div class="follower_following">
+                <div class="now_watching"><a href="{{url_for('followers')}}">{{ follower_number }} Followers</a></div>
+                <div class="now_watching activecolor"><a href="{{url_for('following')}}">{{ following_number }} Following</a></div>
+            </div>
+        </div>
+    </div>
+    <!--End of Profile Pic & Name Section-->
+
+    <!--Follower/Following List-->
+    <div class="list">
+        <table>
+            {% for person in following %}
+            <tr>
+                <th class="avatar_pic"><img src="../static/Images/default_profile.webp" alt="" /></th>
+                <th class="avatar_name">{{ person.name }} <span>@{{ person.username }}</span></th>
+                <th>
+                    <form action="{{url_for('following')}}" method="post" name = {{person.username}}>
+                        {{ form.hidden_tag() }}
+                        {{ form.user_id(value = person.id, type = "hidden") }}
+                        {{ form.unfollow(class = "remove-btn") }}
+                    <!-- <button class="remove-btn">Unfollow</button> -->
+                    </form>
+                </th>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <br>
+    </div>
+    {% endblock %}
