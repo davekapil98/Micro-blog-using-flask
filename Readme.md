@@ -1,6 +1,6 @@
 # **Flask Micro-Blog Project**
 
-## This is my **CS50** Final Project
+## This is my **CS50** Final Project. (**The Project is still ongoing**)
 
 ### Aim of this Project:
 To create a basic version of web application which is in function like **Twitter** and allows user to create an account and post micro-blogs on the social media web-app.
