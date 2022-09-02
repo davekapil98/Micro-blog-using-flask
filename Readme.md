@@ -1,11 +1,12 @@
 # **Flask Micro-Blog Project**
 
 ## This is my **CS50** Final Project. (**The Project is still ongoing**)
----
+
 
 ### Aim of this Project:
 ---
 To create a basic version of web application which is in function like **Twitter** and allows user to create an account and post micro-blogs on the social media web-app.
+
 
 ### Scope of the Project:
 ---
@@ -19,6 +20,7 @@ To create a basic version of web application which is in function like **Twitter
 8. **Personal Feed** based on who you follow.✅
 9. Function for **Change Password** & **Delete Account Permanently**. ✅
 10. Completely **Responsive** Web app so it can also be used on smaller screen devices.✅
+
 
 #### Major platforms/languages used for project:
 ---
@@ -42,9 +44,9 @@ Refer the "requirements.txt" file.
 ---
 Refer my "Micro-Blog-Website-Frontend" Project. 
 
-# ** Deploy on your Computer
+# Deploy on your Computer
 ---
-##**Run locally
+## Run locally
 Set up a Python 3 virtualenv and install the dependencies on it:
 
 `python3 -m venv venv`
