@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import render_template, redirect, url_for, session, request
+from flask import render_template, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
@@ -169,7 +169,7 @@ class RemoveUnfollowForm(FlaskForm):
 
 # Resuable Functions
 #===============================================================================================
-
+# Function to Add new posts to the database
 def addpost(form):
     # Check if image is added or not
     if form.image_url.data:
@@ -211,8 +211,7 @@ def index():
         following_list.append(following.follower_id)
     following_list.insert(0, current_user.id)
     all_posts = Post.query.filter(Post.author_id.in_(following_list)).all()
-
-    # Sort the posts in LIFO order to see lastest posts on the top.
+    # Sort the posts in LIFO order to see lastest posts on the top. Also add extra information such as name, username & profile_pic_url
     new_posts = []
     for post in all_posts:
         new_post = {
@@ -229,37 +228,52 @@ def index():
 
     return render_template('index.html', form=form, posts = new_posts, user_pic = user_profile_pic)
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+
 #Register Route
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    # Register new user and add info to database
     form = RegisterForm()
     if form.validate_on_submit():
+        # encrypt the password using bcrypt
         hashed_password = bcrypt.generate_password_hash(form.password.data)
         new_username = form.username.data
         new_user = User(username = new_username, name = form.name.data, password = hashed_password)
         db.session.add(new_user)
         db.session.commit()
+        # Get the id of the newly created user
         new_created = User.query.filter_by(username = new_username).first()
         new_id = new_created.id
+        # create a session message to send new user's id across to the new user profile page
         session['messages'] = new_id
         return redirect(url_for('new_profile'))
     return render_template('register.html', form=form)
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+
 # Login Route
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    # Login the user
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username = form.username.data).first()
+        # Check if username exists in the db
         if user:
+            # if the username exists then check if password is correct
             if bcrypt.check_password_hash(user.password, form.password.data):
                 login_user(user)
                 return redirect(url_for('index'))
+            # if password is incorrect display incorrect password error
             else:
                 return render_template('login.html', form=form, password_error = "Incorrect password!!")
+        # if username is incorrect display incorrect username error
         else:
              return render_template('login.html', form=form, username_error = "Username does not exist!!")
     return render_template('login.html', form=form)
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Logout Route
 @app.route("/logout", methods=["GET", "POST"])
@@ -273,16 +287,21 @@ def logout():
 @login_required
 def changepassword():
     form = ChangePasswordForm()
+    # Prepopulate the username with current username and make it disabled
     form.username.data = current_user.username
     if form.validate_on_submit():
         user = User.query.filter_by(username = form.username.data).first()
         if user:
+            # check if current password is correct
             if bcrypt.check_password_hash(user.password, form.current_password.data):
+                # encrypt the new password and update the database with new password
                 new_hashed_password = bcrypt.generate_password_hash(form.new_password.data)
                 user.password = new_hashed_password
                 db.session.commit()
                 return redirect(url_for('index'))
     return render_template("changepassword.html", form=form)
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Explore Route
 @app.route("/explore", methods = ["GET", "POST"])
@@ -291,7 +310,7 @@ def explore():
     form = Add_PostForm()
     user_profile_pic = (User_Profile.query.filter_by(owner_id = current_user.id).first()).profile_pic_url
     posts = Post.query.all()
-    # Sort the posts in LIFO order to see lastest posts on the top.
+    # Sort the posts in LIFO order to see lastest posts on the top. Also add extra information such as name, username & profile_pic_url
     new_posts = []
     for post in posts:
         new_post = {
@@ -306,93 +325,127 @@ def explore():
         }
         new_posts.insert(0,new_post)
         
+        # Add new posts function for the explore pageS
         if form.validate_on_submit():
             addpost(form)
             return redirect(url_for('explore'))
 
     return render_template('explore.html', form=form, posts = new_posts, user_pic = user_profile_pic)
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+
 # New_Profile. This is only for new users signing up
 @app.route("/new_profile", methods = ["GET", "POST"])
 def new_profile():
     try:
+        # get the new user's id from session messages sent in the register route
+        #i f this messages does not exists then that means someone tried to access this page via url and this prevents it
         id = session['messages']
     except KeyError:
  # Returns a 403.html whihch does not exist to indicate that this page cannot be accessed by directly changing the url
         return render_template('403.html')
+    
+    # Get the profile info of the new user & store to database
     form = NewUserForm()
     id = session['messages']
     if form.validate_on_submit():
         new_profile = User_Profile(description=form.description.data, email=form.email.data, Birthdate=form.birthdate.data, owner_id=id)
         db.session.add(new_profile)
         db.session.commit()
+        # clear the session messages
         session.clear()
         return redirect(url_for('index'))
     return render_template('first_profile.html', form=form)
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------
 
 # My_Profile
 @app.route("/my_profile", methods = ["GET", "POST"])
 @login_required
 def my_profile():
+    # Get user's profile information and display it with prepopulated form with disabled fields
     profile = User_Profile.query.filter_by(owner_id = current_user.id).first()
     form = MyProfileForm(description = profile.description, birthdate = profile.Birthdate, name = profile.user_user.name, email = profile.email)
     
+    # The form fields will be enabled with JS and on submit update the change profile in the database
     if form.validate_on_submit():
         new_name = form.name.data
         profile.user_user.name = new_name
         profile.description = form.description.data
         profile.email = form.email.data
         profile.Birthdate = form.birthdate.data
-        # Add profile Pic
+        # Add profile Pic of the user and store it locally
         if form.profile_pic_file.data:
+            # Secure the file name using the secure_filename function
             filename = secure_filename(form.profile_pic_file.data.filename)
+            # Create a unique file name for the pic using uuid
             new_filename = (str(uuid.uuid1()) + filename)
+            #save the pic to path 'static/images/uploads/"New picture name"' with new filename
             form.profile_pic_file.data.save('static/images/uploads/' + new_filename)
+            # save the new filename to database to be accessed later
             profile.profile_pic_url= new_filename
+        #Save all changes to profile to db
         try:
             db.session.commit()
         except:
             return redirect(url_for('index'))
 
-    return render_template('my_profile.html', form=form, my_profile = profile, )
+    return render_template('my_profile.html', form=form, my_profile = profile)
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------
 
 # View all other user's profiles
 @app.route('/profile/<username>', methods = ["GET", "POST"])
 @login_required
 def user_profile(username):
+    # user tries to access thier own profile page they will be redirected to my_profile page
     if username == current_user.username:
         return redirect(url_for('my_profile'))
-
+    
+    # Get user info from database 
     user_profile = User.query.filter_by(username = username).first()
 
+    # if no such user exists the render 404 "Not Found"
     if not user_profile:
         return render_template("404.html")
     
+    
     form = FollowUnfollowForm()
+    # Check is current_user follows the other user
     follow_check = Follow.query.filter_by(users_id = current_user.id, follower_id = user_profile.id).first()
+    # initall set following as False aka not following
     following = False
     if follow_check:
+        # if following the change following variable to true. This variable is used to toggle between follow and unfollow button in jinja template
         following = True
+    # If follow button is clicked add the entry to follow table where it incidates current user is following the other user is made
     if form.validate_on_submit():
         if form.follow.data:
             new_follow = Follow(users_id = current_user.id, follower_id = user_profile.id)
             db.session.add(new_follow)
             db.session.commit()
             return redirect(url_for('user_profile', username = username))
+        # If unfollow button is clicked add the entry to follow table where it incidates current user is following the other user is deleted
         else:
             unfollow = Follow.query.filter_by(users_id = current_user.id, follower_id = user_profile.id).first()
             db.session.delete(unfollow)
             db.session.commit()
             return redirect(url_for('user_profile', username = username))
+    # other's users profile to be shown on profile page
     profile = User_Profile.query.filter_by(owner_id = user_profile.id).first()
     return render_template("users_profile.html", profile = profile, form = form, following = following)
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Account Settings
 @app.route("/account", methods = ["GET", "POST"])
 @login_required
 def account():
     form = Account()
+    # Get current users profile for name and profile pic
     profile = User_Profile.query.filter_by(owner_id = current_user.id).first()
+    
+    # Dispaly 2 buttons for change password and for delete account permanently
     if form.validate_on_submit():
         if form.change_password.data:
             return redirect(url_for('changepassword'))
@@ -402,19 +455,23 @@ def account():
     
     return render_template("account.html", form=form, profile = profile)
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+
 # Follower List
 @app.route ("/followers", methods = ["GET", "POST"])
 @login_required
 def followers():
     form = RemoveUnfollowForm()
+    # Get current user's profile
     profile = User_Profile.query.filter_by(owner_id = current_user.id).first()
+    # Get followers and following lists and lenght of lists aka numbers of followers and numbers following
     followers = Follow.query.filter_by(follower_id = current_user.id).all()
     following = Follow.query.filter_by(users_id = current_user.id).all()
     follower_number = len(followers)
     following_number = len(following)
         
     all_followers_data = []
-    
+    # Get the information such as name, username, id and profie pic of the followers
     for follow in followers:
         follow_info = {}
         user_info = (User.query.filter_by(id = follow.users_id).first())
@@ -425,7 +482,8 @@ def followers():
         follow_info['username'] = user_info.username
         all_followers_data.append(follow_info)
     
-    if request.method == "POST" or form.validate_on_submit():
+    # if Remove button is pressed the remove the entry of other user following the current user from database
+    if form.validate_on_submit():
         username_id = form.user_id.data
         remove = Follow.query.filter_by(users_id = username_id, follower_id = current_user.id).first()
         db.session.delete(remove)
@@ -434,18 +492,23 @@ def followers():
     
     return render_template("follower.html", form=form, profile = profile, followers = all_followers_data, follower_number = follower_number, following_number = following_number, users_name = current_user.name)
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+
 # Following List
 @app.route ("/following", methods = ["GET", "POST"])
 @login_required
 def following():
     form = RemoveUnfollowForm()
+    # Get current user's profile
     profile = User_Profile.query.filter_by(owner_id = current_user.id).first()
+    # Get followers and following lists and lenght of lists aka numbers of followers and numbers following
     followers = Follow.query.filter_by(follower_id = current_user.id).all()
     following = Follow.query.filter_by(users_id = current_user.id).all()
     follower_number = len(followers)
     following_number = len(following)
-    all_following_data = []
     
+    all_following_data = []
+     # Get the information such as name, username, id and profie pic of the people following
     for follow in following:
         follow_info = {}
         user_info = (User.query.filter_by(id = follow.follower_id).first())
@@ -456,8 +519,8 @@ def following():
         follow_info['username'] = user_info.username
         all_following_data.append(follow_info)
         
-    
-    if request.method == "POST" or form.validate_on_submit():
+    # if Unfollow button is pressed the remove the entry of current user following the other user from database
+    if form.validate_on_submit():
         username_id = form.user_id.data
         unfollow = Follow.query.filter_by(users_id = current_user.id, follower_id = username_id).first()
         db.session.delete(unfollow)
@@ -465,21 +528,25 @@ def following():
         return redirect(url_for('following'))     
     return render_template("following.html", form = form, profile = profile, following = all_following_data, follower_number = follower_number, following_number = following_number, users_name = current_user.name)
 
+#----------------------------------------------------------------------------------------------------------------------------------------------------
+
 # Permenant Account Delete
 @app.route ("/delete_account", methods = ["GET", "POST"])
 @login_required
 def deleteaccount():
         try:
+            # get id from session messages. if this messages does not exists then that means someone tried to access this page via url and this prevents it
             user_id = session['messages']
         except KeyError:
             # Returns a 403.html whihch does not exist to indicate that this page cannot be accessed by directly changing the url
             return render_template('403.html')
-        
+        # Get all the information of the user i.e profile, posts, following, followers and user info
         user_info = User.query.filter_by(id = current_user.id).first()
         all_posts = Post.query.filter_by(author_id = current_user.id).all()
         following_users = Follow.query.filter_by(users_id = current_user.id).all()
         users_following = Follow.query.filter_by(follower_id = current_user.id).all()
         users_profile = User_Profile.query.filter_by(owner_id = current_user.id).first()
+        # One by one delete all
         db.session.delete(user_info)
         for post in all_posts:
             db.session.delete(post)
@@ -489,7 +556,9 @@ def deleteaccount():
             db.session.delete(user)
         db.session.delete(users_profile)
         db.session.commit()
+        # Clear session messages
         session.clear()
+        # Logut and return to login page
         return redirect(url_for('logout'))
 
 #===============================================================================================================================================================================================================
