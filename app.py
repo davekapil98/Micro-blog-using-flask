@@ -167,6 +167,28 @@ class RemoveUnfollowForm(FlaskForm):
     user_id = StringField(validators=[DataRequired()])
 #===============================================================================================================================================================================================================
 
+# Resuable Functions
+#===============================================================================================
+
+def addpost(form):
+    # Check if image is added or not
+    if form.image_url.data:
+        image_url = form.image_url.data
+    else:
+        image_url = None
+    
+    # Check if video is added or not
+    if form.video_url.data:
+        video_url = form.video_url.data
+    else:
+        video_url = None
+
+    # Add the data of post to the database
+    add_post = Post(content = form.content.data, author_id = current_user.id, image_url = image_url, video_url = video_url)
+    db.session.add(add_post)
+    db.session.commit()
+    return 
+
 #All Routes
 #===============================================================================================================================================================================================================
 # Default route
@@ -179,23 +201,7 @@ def index():
     form = Add_PostForm()
     user_profile_pic = (User_Profile.query.filter_by(owner_id = current_user.id).first()).profile_pic_url
     if form.validate_on_submit():
-
-        # Check if image is added or not
-        if form.image_url.data:
-            image_url = form.image_url.data
-        else:
-            image_url = None
-        
-        # Check if video is added or not
-        if form.video_url.data:
-            video_url = form.video_url.data
-        else:
-            video_url = None
-
-        # Add the data of post to the database
-        add_post = Post(content = form.content.data, author_id = current_user.id, image_url = image_url, video_url = video_url)
-        db.session.add(add_post)
-        db.session.commit()
+        addpost(form)
         return redirect(url_for('index'))
 
     # Get all posts from the database of both user and the other users they are following
@@ -299,6 +305,10 @@ def explore():
             'profile_pic_url': (User_Profile.query.filter_by(owner_id = post.author_id).first()).profile_pic_url
         }
         new_posts.insert(0,new_post)
+        
+        if form.validate_on_submit():
+            addpost(form)
+            return redirect(url_for('explore'))
 
     return render_template('explore.html', form=form, posts = new_posts, user_pic = user_profile_pic)
 
@@ -333,6 +343,7 @@ def my_profile():
         profile.description = form.description.data
         profile.email = form.email.data
         profile.Birthdate = form.birthdate.data
+        # Add profile Pic
         if form.profile_pic_file.data:
             filename = secure_filename(form.profile_pic_file.data.filename)
             new_filename = (str(uuid.uuid1()) + filename)
