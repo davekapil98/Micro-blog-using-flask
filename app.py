@@ -19,17 +19,14 @@ from config import Config
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
-# Initialize the database
-db = SQLAlchemy(app)
-
 # Config file
 app.config.from_object(Config)
 
-# Initialize the database
-db = SQLAlchemy(app)
-
 # Configure the database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///microblog.db'
+
+# Initialize the database
+db = SQLAlchemy(app)
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
